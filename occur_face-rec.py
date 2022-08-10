@@ -294,7 +294,7 @@ def face_recognize(url = 0):
             results = faceDetection.process(rgb_frame)
             # cv2.imshow('FaceDetector', rgb_frame)
             face_locations = []
-            if (time.time()-timer)>=2.5:
+            if (time.time()-timer)>=5:
                 # print('clearing array')
                 pName = []
             if results.detections:
@@ -444,7 +444,7 @@ res = True
 # url = "rtsp://admin:admin321!!@192.168.10.33:554/ch01/0"
 # url = 0
 # url="video1.mp4"
-url="pexels-cottonbro-5329613.mp4"
+url="test3.mp4"
 
 if res:
     face_recognize(url)

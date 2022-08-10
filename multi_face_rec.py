@@ -58,6 +58,7 @@ def capture(read_frame_list, Global, worker_num):
     video_capture.release()
 
 
+
 # Many subprocess use to process frames.
 def process(worker_id, read_frame_list, write_frame_list, Global, worker_num):
     known_face_encodings = Global.known_face_encodings

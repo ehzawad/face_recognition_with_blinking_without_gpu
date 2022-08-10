@@ -231,14 +231,14 @@ def face_recognize(url = 0):
         #     video_capture.release()
         # Grab a single frame of video
         ret, frame = video_capture.read()
-        # if frame is not None:
-            # frame = cv2.resize(frame, (0, 0), fx=0.4, fy=0.4)
+        if frame is not None:
+            frame = cv2.resize(frame, (0, 0), fx=0.4, fy=0.4)
         #time out
         if not ret:
             # time.sleep(1.0)
             video_capture = gen_capture(stream=video_capture,url=url)
             ret, frame = video_capture.read()
-            # frame = cv2.resize(frame, (0, 0), fx=0.4, fy=0.4)
+            frame = cv2.resize(frame, (0, 0), fx=0.4, fy=0.4)
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -311,9 +311,9 @@ blink_num = 4
 res = True
 
 #url = "rtsp://admin:PE-LD-04@192.168.10.33:554/media/video2"
-# url = "rtsp://admin:admin321!!@192.168.10.33:554/ch01/0"
+url = "rtsp://admin:admin321!!@192.168.10.33:554/ch01/0"
 # url = 0
-url="vid1.webm"
+# url="vid1.webm"   
 if res:
     face_recognize(url)
 else:

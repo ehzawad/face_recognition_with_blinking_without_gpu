@@ -22,8 +22,8 @@ app = Flask(__name__)
 # initialize the video stream and allow the camera sensor to
 # warmup
 #vs = VideoStream(usePiCamera=1).start()
-vs = VideoStream(src=0).start()
-time.sleep(2.0)
+#vs = VideoStream(src=0).start()
+#time.sleep(2.0)
 
 @app.route("/")
 def index():
@@ -50,9 +50,9 @@ def gen_capture(stream = None, url = 0,fps=None):
         return stream
 
 def detect_motion(frameCount):
-
     global vs, outputFrame, lock
     url = "rtsp://admin:admin321!!@192.168.10.33:554/ch01/0"
+    # url= "test3.mp4"
     video_capture = cv2.VideoCapture(url)
     video_capture.set(cv2.CAP_PROP_BUFFERSIZE,1)
     while True:
@@ -69,15 +69,15 @@ def detect_motion(frameCount):
             ret, frame = video_capture.read()
             frame = cv2.resize(frame, (0, 0), fx=0.3, fy=0.3)
 
-        
+
         with lock:
             outputFrame = frame.copy()
-	
+
 
 def gen(camera):
     n=0
     while True:
-        
+
         frame = camera.get_frame()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
@@ -88,17 +88,18 @@ def video_feed():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
-            
+
 
 # check to see if this is the main thread of execution
 if __name__ == '__main__':
-	
+
 	# start a thread that will perform motion detection
-	t = threading.Thread(target=detect_motion, args=32)
-	t.daemon = True
-	t.start()
+	#t = threading.Thread(target=detect_motion, args=32)
+	#t.daemon = True
+	#t.start()
 	# start the flask app
-	app.run(host='192.168.10.89', debug=False,
+	# app.run(host='192.168.10.53', debug=False,
+	app.run(host='0.0.0.0', debug=False,
 		threaded=True, use_reloader=False)
 # release the video stream pointer
-vs.stop()
+#vs.stop()

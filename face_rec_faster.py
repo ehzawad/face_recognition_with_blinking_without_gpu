@@ -19,6 +19,7 @@ import face_recognition
 import pickle
 from collections import deque
 import random
+import pandas as pd
 
 import mediapipe as mp
 
@@ -205,9 +206,9 @@ if not os.path.exists("encodings.pkl"):
     for i in range(len(my_list)):
         if(my_list[i]!=".ipynb_checkpoints"):
 
-            image=face_recognition.load_image_file("known_images/"+my_list[i]+"/01.jpg")
+            image=face_recognition.load_image_file("known_images/"+my_list[i]+"/02.jpg")
             print(my_list[i])
-            face_encoding = face_recognition.face_encodings(image,num_jitters=50)[0]
+            face_encoding = face_recognition.face_encodings(image,num_jitters=100)[0]
             known_face_encodings.append(face_encoding)
             known_face_names.append(my_list[i])
 
@@ -238,14 +239,17 @@ def face_recognize(url = 0):
         #     video_capture.release()
         # Grab a single frame of video
         ret, frame = video_capture.read()
-        # if frame is not None:
-            # frame = cv2.resize(frame, (0, 0), fx=0.4, fy=0.4)
+        if frame is not None:
+            frame = cv2.resize(frame, (0, 0), fx=0.3, fy=0.3)
+            # frame = cv2.resize(frame, (0, 0), fx=320, fy=180)
+
         #time out
         if not ret:
             # time.sleep(1.0)
             video_capture = gen_capture(stream=video_capture,url=url)
             ret, frame = video_capture.read()
-            # frame = cv2.resize(frame, (0, 0), fx=0.4, fy=0.4)
+            frame = cv2.resize(frame, (0, 0), fx=0.3, fy=0.3)
+            # frame = cv2.resize(frame, (0, 0), fx=320, fy=180)
         # Convert the image from BGR color (which OpenCV uses) to RGB color (which face_recognition uses)
         # rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         rgb_frame = frame
@@ -275,10 +279,10 @@ def face_recognize(url = 0):
 
         # Find all the faces and face enqcodings in the frame of video
     #     face_locations = face_recognition.face_locations(rgb_frame,number_of_times_to_upsample=1)
-        print(face_locations)
+        #print(face_locations)
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
-        print("line")
-        print(face_encodings)
+        #print("line")
+        #print(face_encodings)
         # Loop through each face in this frame of video
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # See if the face is a match for the known face(s)
@@ -294,9 +298,16 @@ def face_recognize(url = 0):
             # Or instead, use the known face with the smallest distance to the new face
             face_distances = face_recognition.face_distance(known_face_encodings, face_encoding)
             #print("face_distances "+str(face_distances))
+            print(face_distances)
             best_match_index = np.argmin(face_distances)
+            print("printing best_match_index")
+            print(best_match_index)
+            print(known_face_names)
+             
             if matches[best_match_index]:
                 name = known_face_names[best_match_index]
+                print("name")
+                print(name)
             # Draw a box around the face
             cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
@@ -338,9 +349,9 @@ blink_num = 4
 res = True
 
 #url = "rtsp://admin:PE-LD-04@192.168.10.33:554/media/video2"
-url = "rtsp://admin:admin321!!@192.168.10.33:554/ch01/0"
+# url = "rtsp://admin:admin321!!@192.168.10.33:554/ch01/0"
 # url = 0
-# url="vid1.webm"
+url="face-demo.mp4"
 if res:
     face_recognize(url)
 else:

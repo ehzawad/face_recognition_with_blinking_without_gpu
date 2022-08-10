@@ -15,6 +15,7 @@ import pandas as pd
 from datetime import datetime
 import mediapipe as mp
 import requests
+import psutil
 
 class VideoCamera(object):
     def __init__(self):
@@ -23,24 +24,32 @@ class VideoCamera(object):
         # instead.
         url = "rtsp://admin:admin321!!@192.168.10.33:554/ch01/0"
         self.video = WebcamVideoStream(src=url).start()
+        print("Thread Started")
+        threads_count = psutil.cpu_count() / psutil.cpu_count(logical=False)
+        print("No:"+str(threads_count))
         # self.video-
         # .set(cv2.CAP_PROP_BUFFERSIZE,1)
         self.known_face_encodings=[]
         self.known_face_names=[]
-        if not os.path.exists("encodings.pkl"):
-            my_list = os.listdir('known_images')
+        if not os.path.exists("/home/ehz/face_rec/encodings.pkl"):
+        # if not os.path.exists("/home/face_rec/encodings.pkl"):
+            my_list = os.listdir('/home/ehz/face_rec/known_images')
+            # my_list = os.listdir('/home/face_rec/known_images')
             for i in range(len(my_list)):
                 if(my_list[i]!=".ipynb_checkpoints"):
-                    image=face_recognition.load_image_file("known_images/"+my_list[i]+"/01.jpg")
+                    # image=face_recognition.load_image_file("/home/face_rec/known_images/"+my_list[i]+"/01.jpg")
+                    image=face_recognition.load_image_file("/home/ehz/face_rec/known_images/"+my_list[i]+"/01.jpg")
                     print(my_list[i])
                     face_encoding = face_recognition.face_encodings(image,num_jitters=100)[0]
                     self.known_face_encodings.append(face_encoding)
                     self.known_face_names.append(my_list[i])
 
-            with open('encodings.pkl','wb') as f:
+            # with open('/home/face_rec/encodings.pkl','wb') as f:
+            with open('/home/ehz/face_rec/encodings.pkl','wb') as f:
                 pickle.dump([self.known_face_encodings,self.known_face_names], f)
         else:
-            with open('encodings.pkl', 'rb') as f:
+            # with open('/home/face_rec/encodings.pkl', 'rb') as f:
+            with open('/home/ehz/face_rec/encodings.pkl', 'rb') as f:
                 self.known_face_encodings ,self.known_face_names = pickle.load(f)
         self.mpFaceDetection = mp.solutions.face_detection
 		# mpDraw = mp.solutions.drawing_utils
@@ -64,12 +73,12 @@ class VideoCamera(object):
 
     def picture_from_frame(self,frame,name = "unknown"):
         this_time = datetime.now().isoformat(timespec='minutes')
-        known_dir="captured_known_images/"+name
+        known_dir="/home/ehz/face_rec/captured_known_images/"+name
         # cap = gen_capture(url=0)
         if not (os.path.isdir(known_dir)):
             mode = 0o777
             os.makedirs(known_dir,mode)
-        
+
         file_path = known_dir+'/'+this_time+'.jpg'
         # print()
         cv2.imwrite(file_path,frame)
@@ -80,15 +89,15 @@ class VideoCamera(object):
         rgb_frame = self.video.frame
         # (self.grabbed, self.frame) = self.stream.read()
         if rgb_frame is not None:
-            rgb_frame = cv2.resize(rgb_frame, (0, 0), fx=0.4, fy=0.3)
+            rgb_frame = cv2.resize(rgb_frame, (0, 0), fx=0.4, fy=0.3333)
 
 
-        # rgb_frame = self.frame 
+        # rgb_frame = self.frame
         results = self.faceDetection.process(rgb_frame)
         face_locations = []
         if (time.time()-self.timer)>=2:
             self.pName = []
-        if results.detections:            
+        if results.detections:
             self.timer = time.time()
             if self.tTime == 0.0:
                 self.tTime = time.time()
@@ -109,16 +118,16 @@ class VideoCamera(object):
         self.pTime = cTime
 
         cv2.putText(rgb_frame, "FPS: {:.2f}".format(fps), (20, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-        
+
         face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
 
         faces = []
         count = 0
         dTime = time.time()
-        
+
         for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
             # See if the face is a match for the known face(s)
-            # count+=1         
+            # count+=1
             print(face_locations)
             name = "Unknown"
             #single face
@@ -127,12 +136,12 @@ class VideoCamera(object):
             if face_distances[best_match_index] < 0.6:
                 name1 = self.known_face_names[best_match_index]
                 if len(self.pName)>=30:
-                    
+
                     # for _ in range(21): self.pName.pop(0)
                     self.pName = self.pName[-1:-9:-1]
 
                 self.pName.append(name1)
-            
+
             #add timer to best optimization
             if(len(self.pName)>=5):
                 name = max(self.pName, key=self.pName.count)
@@ -143,13 +152,13 @@ class VideoCamera(object):
             if(len(self.pName)==7):
                 try:
                     print('requesting... for name - {} id - {}'.format(name.split('-')[0],name.split('-')[-1]))
-                    
+
                     self.picture_from_frame(rgb_frame,name = name)
                     requests.get('http://192.168.10.87:8080?id={}'.format(name.split('-')[-1]))
 
                 except:
                     pass
-                
+
             cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 0, 255), 2)
 
             # Draw a label with a name below the face
